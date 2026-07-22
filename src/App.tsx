@@ -20,21 +20,33 @@ function ModelWithAutoFit() {
     const vFov = ((camera as THREE.PerspectiveCamera).fov * Math.PI) / 180
     const hFov = 2 * Math.atan(Math.tan(vFov / 2) * aspect)
     const effectiveFov = Math.min(vFov, hFov)
-    const distance = (radius / Math.sin(effectiveFov / 2)) * 1.35
 
-    const dir = new THREE.Vector3(1, 0.45, -1).normalize()
+    // Only adjust framing (zoom/vertical shift) for mobile & tablet — desktop stays as-is
+    const isSmallScreen = size.width <= 768
+    const marginFactor = isSmallScreen ? 1.15 : 1.35
+    const verticalShiftFactor = isSmallScreen ? 0.35 : 0
+
+    const distance = (radius / Math.sin(effectiveFov / 2)) * marginFactor
+
+    // Shift the look-at point down a bit so the model appears higher in the frame (mobile/tablet only)
+    const adjustedCenter = center.clone()
+    adjustedCenter.y -= radius * verticalShiftFactor
+
+    // Keep the exact confirmed desktop viewing angle — only scale distance
+    // so the same angle fits narrower mobile aspect ratios too.
+    const dir = new THREE.Vector3(30, 3.2, -30.4).normalize()
     camera.position.set(
-      center.x + dir.x * distance,
-      center.y + dir.y * distance,
-      center.z + dir.z * distance
+      adjustedCenter.x + dir.x * distance,
+      adjustedCenter.y + dir.y * distance,
+      adjustedCenter.z + dir.z * distance
     )
     ;(camera as THREE.PerspectiveCamera).near = Math.max(distance / 100, 0.1)
     ;(camera as THREE.PerspectiveCamera).far = distance * 10
-    camera.lookAt(center)
+    camera.lookAt(adjustedCenter)
     camera.updateProjectionMatrix()
 
     if (controlsRef.current) {
-      controlsRef.current.target.copy(center)
+      controlsRef.current.target.copy(adjustedCenter)
       controlsRef.current.update()
     }
   }, [scene, size.width, size.height, camera])

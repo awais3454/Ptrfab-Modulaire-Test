@@ -23,18 +23,19 @@ function ModelWithAutoFit() {
 
     // Only adjust framing (zoom/vertical shift) for mobile & tablet — desktop stays as-is
     const isSmallScreen = size.width <= 768
-    const marginFactor = isSmallScreen ? 1.15 : 1.35
-    const verticalShiftFactor = isSmallScreen ? 0.35 : 0
+    const marginFactor = isSmallScreen ? 0.8 : 0.6
+    const verticalShiftFactor = isSmallScreen ? 0.35 : 0.1
 
     const distance = (radius / Math.sin(effectiveFov / 2)) * marginFactor
 
-    // Shift the look-at point down a bit so the model appears higher in the frame (mobile/tablet only)
-    const adjustedCenter = center.clone()
-    adjustedCenter.y -= radius * verticalShiftFactor
-
+   // Shift the look-at point down a bit so the model appears higher in the frame (mobile/tablet only)
+  const adjustedCenter = center.clone()
+adjustedCenter.y -= radius * verticalShiftFactor
+adjustedCenter.x += isSmallScreen ? 0 : radius * 0.5
+    // Keep the exact confirmed desktop viewing angle — only scale distance
     // Keep the exact confirmed desktop viewing angle — only scale distance
     // so the same angle fits narrower mobile aspect ratios too.
-    const dir = new THREE.Vector3(30, 3.2, -30.4).normalize()
+    const dir = new THREE.Vector3(25, 4, -30.4).normalize()
     camera.position.set(
       adjustedCenter.x + dir.x * distance,
       adjustedCenter.y + dir.y * distance,

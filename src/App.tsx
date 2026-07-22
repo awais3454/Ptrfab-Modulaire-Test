@@ -14,9 +14,9 @@ function useCameraPosition() {
     function updatePosition() {
       const w = window.innerWidth
       if (w <= 480) {
-        setPosition([42, 4.5, -42.5])
+        setPosition([52, 5.5, -52.5])
       } else if (w <= 768) {
-        setPosition([36, 3.8, -36.5])
+        setPosition([42, 4.4, -42.5])
       } else {
         setPosition([30, 3.2, -30.4])
       }
@@ -49,6 +49,13 @@ export default function App() {
         }
         .logo-img {
           height: 160px;
+          display: block;
+          margin-left: -10px;
+          margin-top: -20px;
+        }
+        .canvas-wrap {
+          position: absolute;
+          inset: 0;
         }
         .popup-box {
           max-width: 280px;
@@ -64,12 +71,22 @@ export default function App() {
             padding: 16px;
             bottom: 16px;
             left: 16px;
+            max-height: 45vh;
           }
           .logo-box {
-            height: 60px;
+            height: 55px;
           }
           .logo-img {
-            height: 110px;
+            height: 100px;
+            margin-left: -6px;
+            margin-top: -12px;
+          }
+          .canvas-wrap {
+            top: -14%;
+          }
+          .model-thumb {
+            max-height: 160px;
+            width: auto !important;
           }
           .popup-box {
             max-width: calc(100vw - 32px);
@@ -83,16 +100,25 @@ export default function App() {
           .info-panel {
             width: calc(100vw - 24px);
             max-width: none;
-            padding: 14px;
+            padding: 12px;
             bottom: 12px;
             left: 12px;
-            max-height: 55vh;
+            max-height: 38vh;
           }
           .logo-box {
-            height: 50px;
+            height: 36px;
           }
           .logo-img {
-            height: 90px;
+            height: 65px;
+            margin-left: -4px;
+            margin-top: -8px;
+          }
+          .canvas-wrap {
+            top: -22%;
+          }
+          .model-thumb {
+            max-height: 120px;
+            width: auto !important;
           }
           .popup-box {
             max-width: calc(100vw - 24px);
@@ -142,13 +168,12 @@ export default function App() {
             className="logo-img"
             src="/logo.png" 
             alt="Logo" 
-            style={{ display: 'block', marginLeft: -10, marginTop: -20 }} 
           />
         </div>
 
         {/* Model image */}
         <div style={{ marginTop: 4, textAlign: 'center' }}>
-          <img src="/model-thumb.jpeg" alt="Model" style={{ maxWidth: '100%', borderRadius: 8 }} />
+          <img className="model-thumb" src="/model-thumb.jpeg" alt="Model" style={{ maxWidth: '100%', borderRadius: 8 }} />
         </div>
 
         {/* Step indicator */}
@@ -177,15 +202,17 @@ export default function App() {
       </div>
 
       {/* 3D view */}
-      <Canvas camera={{ position: cameraPosition, fov: 40 }}>
-        <Suspense fallback={null}>
-          <Center>
-            <Model />
-          </Center>
-          <Environment preset="city" />
-        </Suspense>
-        <OrbitControls makeDefault enableDamping />
-      </Canvas>
+      <div className="canvas-wrap">
+        <Canvas camera={{ position: cameraPosition, fov: 40 }}>
+          <Suspense fallback={null}>
+            <Center>
+              <Model />
+            </Center>
+            <Environment preset="city" />
+          </Suspense>
+          <OrbitControls makeDefault enableDamping />
+        </Canvas>
+      </div>
     </div>
   )
 }

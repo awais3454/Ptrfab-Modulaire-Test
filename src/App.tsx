@@ -1,48 +1,72 @@
-import { Canvas } from '@react-three/fiber'
-import { OrbitControls, useGLTF, Environment, Center } from '@react-three/drei'
-import { Suspense, useState, useEffect } from 'react'
+import { Canvas, useThree } from '@react-three/fiber'
+import { OrbitControls, useGLTF, Environment } from '@react-three/drei'
+import { Suspense, useState, useEffect, useRef } from 'react'
+import * as THREE from 'three'
 
-function Model() {
+function ModelWithAutoFit() {
   const { scene } = useGLTF('/model.glb')
-  return <primitive object={scene} />
-}
-
-function useCameraPosition() {
-  const [position, setPosition] = useState<[number, number, number]>([30, 3.2, -30.4])
+  const { camera, size } = useThree()
+  const controlsRef = useRef<any>(null)
 
   useEffect(() => {
-    function updatePosition() {
-      const w = window.innerWidth
-      if (w <= 480) {
-        setPosition([52, 5.5, -52.5])
-      } else if (w <= 768) {
-        setPosition([42, 4.4, -42.5])
-      } else {
-        setPosition([30, 3.2, -30.4])
-      }
-    }
-    updatePosition()
-    window.addEventListener('resize', updatePosition)
-    return () => window.removeEventListener('resize', updatePosition)
-  }, [])
+    const box = new THREE.Box3().setFromObject(scene)
+    const sphere = new THREE.Sphere()
+    box.getBoundingSphere(sphere)
+    const center = sphere.center
+    const radius = sphere.radius || 1
 
-  return position
+    // Account for aspect ratio so narrow mobile screens don't crop the model
+    const aspect = size.width / size.height
+    const vFov = ((camera as THREE.PerspectiveCamera).fov * Math.PI) / 180
+    const hFov = 2 * Math.atan(Math.tan(vFov / 2) * aspect)
+    const effectiveFov = Math.min(vFov, hFov)
+    const distance = (radius / Math.sin(effectiveFov / 2)) * 1.35
+
+    const dir = new THREE.Vector3(1, 0.45, -1).normalize()
+    camera.position.set(
+      center.x + dir.x * distance,
+      center.y + dir.y * distance,
+      center.z + dir.z * distance
+    )
+    ;(camera as THREE.PerspectiveCamera).near = Math.max(distance / 100, 0.1)
+    ;(camera as THREE.PerspectiveCamera).far = distance * 10
+    camera.lookAt(center)
+    camera.updateProjectionMatrix()
+
+    if (controlsRef.current) {
+      controlsRef.current.target.copy(center)
+      controlsRef.current.update()
+    }
+  }, [scene, size.width, size.height, camera])
+
+  return (
+    <>
+      <primitive object={scene} />
+      <OrbitControls ref={controlsRef} makeDefault enableDamping />
+    </>
+  )
 }
 
 export default function App() {
   const [showHint, setShowHint] = useState(true)
-  const cameraPosition = useCameraPosition()
 
   return (
-    <div style={{ width: '100vw', height: '100vh', position: 'relative', background: '#faf6f0', fontFamily: 'sans-serif', overflow: 'hidden' }}>
+    <div className="app-root" style={{ position: 'relative', background: '#faf6f0', fontFamily: 'sans-serif', overflow: 'hidden' }}>
 
       {/* Responsive rules */}
       <style>{`
+        .app-root {
+          width: 100vw;
+          height: 100vh;
+          height: 100dvh;
+        }
         .info-panel {
           width: 380px;
           padding: 24px;
           bottom: 24px;
           left: 24px;
+          max-height: 80vh;
+          overflow-y: auto;
         }
         .logo-box {
           height: 90px;
@@ -63,6 +87,11 @@ export default function App() {
           top: 16px;
           left: 16px;
         }
+        .model-thumb {
+          max-height: 220px;
+          width: auto;
+          max-width: 100%;
+        }
 
         @media (max-width: 768px) {
           .info-panel {
@@ -80,9 +109,6 @@ export default function App() {
             height: 100px;
             margin-left: -6px;
             margin-top: -12px;
-          }
-          .canvas-wrap {
-            top: -14%;
           }
           .model-thumb {
             max-height: 160px;
@@ -103,7 +129,8 @@ export default function App() {
             padding: 12px;
             bottom: 12px;
             left: 12px;
-            max-height: 38vh;
+            max-height: 48vh;
+            overflow-y: auto;
           }
           .logo-box {
             height: 36px;
@@ -112,9 +139,6 @@ export default function App() {
             height: 65px;
             margin-left: -4px;
             margin-top: -8px;
-          }
-          .canvas-wrap {
-            top: -22%;
           }
           .model-thumb {
             max-height: 120px;
@@ -156,8 +180,6 @@ export default function App() {
       <div className="info-panel" style={{
         position: 'absolute',
         zIndex: 10,
-        maxHeight: '80vh',
-        overflowY: 'auto',
         background: '#fff',
         borderRadius: 16,
         boxShadow: '0 4px 20px rgba(0,0,0,0.1)',
@@ -203,14 +225,11 @@ export default function App() {
 
       {/* 3D view */}
       <div className="canvas-wrap">
-        <Canvas camera={{ position: cameraPosition, fov: 40 }}>
+        <Canvas camera={{ fov: 40 }}>
           <Suspense fallback={null}>
-            <Center>
-              <Model />
-            </Center>
+            <ModelWithAutoFit />
             <Environment preset="city" />
           </Suspense>
-          <OrbitControls makeDefault enableDamping />
         </Canvas>
       </div>
     </div>

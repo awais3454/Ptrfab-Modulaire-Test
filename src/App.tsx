@@ -43,24 +43,29 @@ export default function App() {
 
       {/* Left panel — logo + content */}
       <div style={{
-        position: 'absolute',
-        left: 24,
-        top: '50%',
-        transform: 'translateY(-50%)',
-        zIndex: 10,
-        width: 380,
-        maxHeight: '80vh',
-        overflowY: 'auto',
-        background: '#fff',
-        borderRadius: 16,
-        boxShadow: '0 4px 20px rgba(0,0,0,0.1)',
-        padding: 24,
-      }}>
+  position: 'absolute',
+  left: 24,
+  bottom: 24,
+  zIndex: 10,
+  width: 380,
+  maxHeight: '80vh',
+  overflowY: 'auto',
+  background: '#fff',
+  borderRadius: 16,
+  boxShadow: '0 4px 20px rgba(0,0,0,0.1)',
+  padding: 24,
+}}>
         {/* Logo */}
-        <img src="/logo.png" alt="Logo" style={{ height: 84, display: 'block' }} />
+<div style={{ height: 90, overflow: 'hidden', display: 'flex', alignItems: 'center', marginTop: 12, marginBottom: 5 }}>
+  <img 
+    src="/logo.png" 
+    alt="Logo" 
+    style={{ height: 160, display: 'block', marginLeft: -10, marginTop: -20 }} 
+  />
+</div>
 
        {/* Model image */}
-        <div style={{ marginTop: 20, textAlign: 'center' }}>
+        <div style={{ marginTop: 4, textAlign: 'center' }}>
           <img src="/model-thumb.jpeg" alt="Model" style={{ maxWidth: '100%', borderRadius: 8 }} />
         </div>
 

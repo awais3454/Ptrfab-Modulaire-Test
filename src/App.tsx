@@ -95,7 +95,7 @@ export default function App() {
       </div>
 
       {/* 3D view */}
-     <Canvas camera={{ position: [20, 12, -20], fov: 40 }}>
+     <Canvas camera={{ position: [20, 0, -15], fov: 40 }}>
         <Suspense fallback={null}>
           <Center>
             <Model />
